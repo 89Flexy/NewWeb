@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music-89</title>
+
+<meta name="description" content="Music-89 is a stylish online music player website to enjoy your favorite songs anytime.">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Music-89">
+<meta property="og:description" content="Listen and enjoy music with Music-89.">
+<meta property="og:image" content="https://drive.google.com/thumbnail?id=1pVLvz0c2tYbX4ZVVPAy1ghL0DHStvf7e&sz=w2000">
+<meta property="og:url" content="music-89.vercel.app/">
+<meta property="og:type" content="website">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#020617;
+  --accent:#38bdf8;
+  --accent-glow:rgba(125,211,252,.6);
+  --text:#e5e7eb;
+}
+*{box-sizing:border-box;font-family:Poppins,system-ui}
+body{
+  margin:0;
+  min-height:100vh;
+  background:radial-gradient(circle at top,#0b2a3d,#020617 65%);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:var(--text);
+}
+.player{
+  position: fixed;              /* 🔒 FIXED */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* 🎯 CENTER */
+  
+  width: 360px;
+  padding: 18px;
+  border-radius: 26px;
+  background:
+    linear-gradient(rgba(2,6,23,0.35),rgba(2,6,23,0.50)),
+    url("https://i.ibb.co/mCR3vR1K/8cd2391b0e8074fd5ba390a55799f750.jpg");
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 30px 70px rgba(0,0,0,.7);
+}
+  .cover{
+  height:220px;
+  border-radius:18px;
+
+  /* 🎯 DEFAULT IMAGE (play se pehle) */
+  background: url("https://i.ibb.co/9mqzHh07/b6084f026b016b404ee4f186944e5885.jpg") center/cover;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:64px;
+  margin-bottom:14px;
+}
+.progress input{width:100%;accent-color:var(--accent)}
+.controls{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+}
+.controls button{
+  border:none;
+  background:none;
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
+}
+.play{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:var(--accent);
+  color:#022c22;
+}
+.list{margin-top:12px;max-height:160px;overflow:auto}
+.song{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.05);
+  margin-bottom:8px;
+  cursor:pointer;
+}
+.song img{width:36px;height:36px;border-radius:6px;object-fit:cover}
+.song:hover{background:rgba(56,189,248,.2)}
+
+/* MOBILE LOGO */
+.mobile-logo{
+  position:fixed;
+  top:14px;
+  left:14px;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  object-fit:cover;
+  z-index:999;
+  display:none;
+  box-shadow:0 0 12px rgba(56,189,248,.6);
+}
+@media(max-width:768px){
+  .mobile-logo{display:block;}
+}
+.cover.playing {
+  animation: float 5s ease-in-out infinite; /* ⚡ 5s = slow */
+}
+
+@keyframes float {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+/* 🎨 BACKGROUND MODAL */
+.bg-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(8px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+}
+
+.bg-box{
+  max-height: 80vh;   /* modal ki max height */
+  overflow-y: auto;  /* vertical scroll */
+  padding-right: 10px;
+}
+
+/* smooth & clean scrollbar (optional but sexy 😎) */
+.bg-box::-webkit-scrollbar{
+  width: 6px;
+}
+.bg-box::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,0.3);
+  border-radius: 10px;
+}
+.bg-box::-webkit-scrollbar-track{
+  background: transparent;
+}
+
+.bg-box h3{
+  text-align:center;
+  margin-bottom:12px;
+}
+
+.bg-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.bg-grid img{
+  width:105%;
+  height:105px;
+  object-fit:cover;
+  border-radius:12px;
+  cursor:pointer;
+  transition:.25s;
+}
+
+.bg-grid img:hover{
+  outline:2px solid #38bdf8;
+  transform:scale(1.05);
+}
+
+.bg-close{
+  margin-top:12px;
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:14px;
+  background:rgba(255,255,255,.1);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+  .top-text {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  
+  font-family: 'Dancing Script', cursive;
+  font-size: 32px;
+  font-weight: 900;
+  color: #38bdf8;
+  text-align: center;
+  letter-spacing: 1.5px;
+
+  z-index: 10000;
+  pointer-events: none;
+
+  /* base glow */
+  text-shadow: 0 0 4px #38bdf8;
+
+  /* startup fast flicker */
+  animation: startupFlicker 1.2s linear 1 forwards;
+}
+
+/* fast flicker on page load */
+@keyframes startupFlicker {
+  0% { opacity: 0.1; text-shadow: none; }
+  10% { opacity: 1; text-shadow: 0 0 6px #38bdf8; }
+  20% { opacity: 0.2; text-shadow: none; }
+  30% { opacity: 1; text-shadow: 0 0 8px #38bdf8; }
+  40% { opacity: 0.3; text-shadow: none; }
+  50% { opacity: 1; text-shadow: 0 0 10px #38bdf8; }
+  60% { opacity: 0.4; text-shadow: none; }
+  70% { opacity: 1; text-shadow: 0 0 12px #38bdf8; }
+  80% { opacity: 0.5; text-shadow: none; }
+  90% { opacity: 1; text-shadow: 0 0 14px #38bdf8; }
+  100% { opacity: 1; text-shadow: 0 0 4px #38bdf8; } /* normal glow freeze */
+}
+
+/* subtle flicker class for 30s interval */
+.flicker {
+  animation: shortFlicker 0.4s ease-in-out 1 forwards;
+}
+
+@keyframes shortFlicker {
+  0% { opacity: 1; text-shadow: 0 0 4px #38bdf8; }
+  50% { opacity: 0.7; text-shadow: 0 0 12px #38bdf8; }
+  100% { opacity: 1; text-shadow: 0 0 4px #38bdf8; }
+}
+
+</style>
+  <script>
+const topText = document.querySelector('.top-text');
+
+// every 30s, add flicker class
+setInterval(() => {
+  topText.classList.add('flicker');
+  
+  // remove class after animation ends
+  setTimeout(() => {
+    topText.classList.remove('flicker');
+  }, 400); // duration = 0.4s
+}, 30000); // 30000ms = 30s
+  </script>
+</head>
+
+<body>
+    
+<div class="top-text">
+  Abhi..
+</div>
+<div class="player">
+  <div class="cover" id="cover"></div>
+
+  <h3 id="songName" style="text-align:center">No song playing</h3>
+
+  <div class="progress">
+    <input type="range" id="progress" value="0">
+  </div>
+
+  <div class="controls">
+    <button onclick="prev()">⏮</button>
+    <button class="play" id="playBtn" onclick="toggle()">▶</button>
+    <button onclick="next()">⏭</button>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <audio id="audio"></audio>
+</div>
+<!-- 🎨 BACKGROUND MODAL -->
+<div class="bg-modal" id="bgModal">
+  <div class="bg-box">
+    <h3>Select Background</h3>
+
+    <div class="bg-grid" id="bgGrid">
+      <img src="https://drive.google.com/thumbnail?id=1m9T-3nRyyiEv0bK_l1fQGMikRr7ILISE&sz=w2000" alt="Bg1">
+<img src="https://drive.google.com/thumbnail?id=1kHdrSebyuQMpQeN-Wo8NSr3MHfYnTpIF&sz=w2000" alt="Bg2">
+<img src="https://drive.google.com/thumbnail?id=1SJa0UpvRSWTmROqJKr95jHvKKSNpjAWr&sz=w2000" alt="Bg3">
+<img src="https://drive.google.com/thumbnail?id=1jeGsGsUSprmqEQ7LJgTOSTDjWNQvO7u5&sz=w2000" alt="Bg4">
+<img src="https://drive.google.com/thumbnail?id=1ElqGvxhuNjigr4_x9Jm322nmxGK2Ozqe&sz=w2000" alt="Bg5">
+
+<img src="https://drive.google.com/thumbnail?id=1KlPhhkLLAZ1kjW_nRs-Q_nrxoRnnwGZf&sz=w2000" alt="Bg6">
+<img src="https://drive.google.com/thumbnail?id=1JAmTgq-_bmEwnc6ZaWGfRbiurO7hYkFb&sz=w2000" alt="Bg7">
+<img src="https://drive.google.com/thumbnail?id=1iTTvw9jmzp57Fu4WTd2r4j3vqCK4h7or&sz=w2000" alt="Bg8">
+<img src="https://drive.google.com/thumbnail?id=1TV0XTl4webT8bgAf2xXB9NfDonKiUYsB&sz=w2000" alt="Bg9">
+<img src="https://drive.google.com/thumbnail?id=12pyGZb3dVoMQsiRxkWxXxMuSWBRZjes1&sz=w2000" alt="Bg10">
+<img src="https://drive.google.com/thumbnail?id=1o5PABogBj6zAVM2KmRQnPxs-VTJUJUeq&sz=w2000" alt="Bg11">
+<img src="https://drive.google.com/thumbnail?id=1pVoq2KlqWS3fkOArWJnJKAmxE5UnYG3B&sz=w2000" alt="Bg12">
+
+<img src="https://drive.google.com/thumbnail?id=10Fui52Tt0O5zWTxcX2-sF2p9UX7jjII9&sz=w2000" alt="Bg13">
+
+<img src="https://drive.google.com/thumbnail?id=1_piv6dAqIl9M1CHvYQU4JynyAHHLMWqR&sz=w2000" alt="Bg14">
+<img src="https://drive.google.com/thumbnail?id=1eIbKfP9v3HYQr2kGt2W7_ESmHStBKnVp&sz=w2000" alt="Bg15">
+<img src="https://drive.google.com/thumbnail?id=1C0rWeckBrJ1OYpf3WC7fc717bjapKD_f&sz=w2000" alt="Bg16">
+<img src="https://drive.google.com/thumbnail?id=127VNKsqgV5Vdzchnb1pOvSrJ41LCEL2B&sz=w2000" alt="Bg17">
+<img src="https://drive.google.com/thumbnail?id=1lBEeznxjRgXA6Yy3Q_y5bfLhodVWYfwd&sz=w2000" alt="Bg18">
+
+<img src="https://drive.google.com/thumbnail?id=1bHKLsp0VBOeBFbnr0Yx3iTJQD1YQHHYn&sz=w2000" alt="Bg19">
+<img src="https://drive.google.com/thumbnail?id=1wWx2accXvzKA41GQmJ4xa_iLVEfiPMfW&sz=w2000" alt="Bg20">
+
+<img src="https://drive.google.com/thumbnail?id=1s5K4HQ-sUibkgdi0CGpHaGg0WhOlHXvA&sz=w2000" alt="Bg21">
+<img src="https://drive.google.com/thumbnail?id=1q_CuQn5P2tW905-GbuErHDXFk4mQ5tlE&sz=w2000" alt="22">
+
+<img src="https://drive.google.com/thumbnail?id=1AltK8n6HMgsWr98MnVFNtCISoJekUDZy&sz=w2000" alt="23">
+
+<img src="https://drive.google.com/thumbnail?id=1f2LQdjtLjKdSpaNSZWIug3sgYkVki22r&sz=w2000" alt="24">
+
+<img src="https://drive.google.com/thumbnail?id=1QyQuIBM3ukaxw-wmH9v-m1RWU6rAr8GS&sz=w2000" alt="25">
+
+<img src="https://drive.google.com/thumbnail?id=1yv3u-E68hJZeC3JeeTfbPcMHLBzDcgUD&sz=w2000" alt="26">
+
+
+<img src="https://drive.google.com/thumbnail?id=1K9hGpHSQF6Yooqzz46_1T_YdLKEjKj_o&sz=w2000" alt="27">
+
+<img src="https://drive.google.com/thumbnail?id=1-0ricINkDfHhY92YsU-7KrCrg2iFa-KV&sz=w2000" alt="28">
+
+<img src="https://drive.google.com/thumbnail?id=1tw4UWBHN7WckIbszFZZPEccHAfCBEvbX&sz=w2000" alt="29">
+
+<img src="https://drive.google.com/thumbnail?id=12-o8fSPGDG8svPXbH5DQ80iL2k3ylbFJ&sz=w2000" alt="30">
+
+
+    </div>
+
+    <button class="bg-close" onclick="closeBgModal()">Close</button>
+  </div>
+</div>
+<!-- SETTINGS ICON -->
+<button class="settings-icon" id="settingsBtn">⚙</button>
+<style>
+.settings-icon{
+  position: fixed;        /* 🔒 FIXED */
+  top: 14px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: white;
+  z-index: 10000;         /* sabke upar rahe */
+  transition: transform .4s ease;
+}
+
+</style>
+
+<script>
+    
+const settingsBtn = document.getElementById("settingsBtn");
+
+/* TOGGLE SETTINGS */
+settingsBtn.addEventListener("click",()=>{
+  settingsBtn.classList.toggle("active");
+  bgModal.style.display =
+    bgModal.style.display === "flex" ? "none" : "flex";
+});
+
+/* CLOSE MODAL PROPERLY */
+function closeBgModal(){
+  bgModal.style.display = "none";
+  settingsBtn.classList.remove("active");
+}
+</script>
+<!-- MOBILE LOGO IMAGE -->
+<img src="https://drive.google.com/thumbnail?id=1pVLvz0c2tYbX4ZVVPAy1ghL0DHStvf7e&sz=w2000" class="mobile-logo" alt="Logo">
+
+<script>
+/* ONLINE SONGS ONLY */
+const songs = [
+  {
+    name:"Paro",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/1ede04fa3e0ba664d2f74bb9d9c44edcdec41fa4/Paro - adityarikhari  UNPLG'd - UNPLGd Records.mp3",
+    cover:"https://drive.google.com/thumbnail?id=1fgANA0vPW_vYiZNv06YmN0hZUSGJBUuC&sz=w2000"
+  },
+  {
+    name:"Ik Kudi",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/b6e2582752150321054c6b8481af85a651f66a75/Ik Kudi - wolf.cryman.mp3",
+    cover:"https://i.ibb.co/9mqzHh07/b6084f026b016b404ee4f186944e5885.jpg"
+  },
+    {
+    name:"SAMJHO NA",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/453a6c45fe119db6d844e18ff217538c98e2cf2a/Aditya Rikhari - SAMJHO NA ( NASAMAJH ) - Aditya Rikhari.mp3",
+    cover:"https://drive.google.com/thumbnail?id=1PNGmFfDg1u3Eg3Tg51GLv7QCcaTjZSxs&sz=w2000"
+  },
+    {
+    name:"Jugraafiya",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/453a6c45fe119db6d844e18ff217538c98e2cf2a/Jugraafiya - Full Video  Super 30  Hrithik Roshan & Mrunal Thakur  Udit Narayan & Shreya Ghoshal - Zee Music Company.mp3",
+    cover:"https://i.ibb.co/0jnJ3DVC/a46ecf05788ba510e4f09d4f08d0578b.jpg"
+  },
+      {
+    name:"Dooriyan",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/453a6c45fe119db6d844e18ff217538c98e2cf2a/Dooriyan - Dino James ft. Kaprila [Official Music Video] - Sony Music India.mp3",
+    cover:"https://i.ibb.co/bjy17LrF/95171b966c7ac0e51a7f0361e0b67d4c.jpg"
+  },
+    {
+    name:"KASHISH",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/453a6c45fe119db6d844e18ff217538c98e2cf2a/KASHISH (Official Music Video) Ashish Bhatia  Kashish Ratnani  Omkar Singh - Ashish Bhatia.mp3",
+    cover:"https://drive.google.com/thumbnail?id=1hngqZ-4TUSG34EnWCUmUK1nY-Cwqh6K7&sz=w2000"
+  },
+      {
+    name:"Jaane Na Tu",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/77f2fb9bb3851431d327185d80b837de8b22b22d/Jaane Na Tu (Official Music Video)  Bhoomi  Almost Loved - EP  UR Debut  Latest Hindi Indie Song - UR DEBUT (1).mp3",
+    cover:"https://drive.google.com/thumbnail?id=1T4ZCztxmXSPoYUluQAAn4rE5minna-DT&sz=w2000"
+  },
+    {
+    name:"Kithe Jawan",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/77f2fb9bb3851431d327185d80b837de8b22b22d/Kithe Jawan (Takki Jawan) - Official Visualiser  Bhoomi  Naaz  Saaheal  UR Debut  Hindi songs - UR DEBUT.mp3",
+    cover:"https://i.ibb.co/twSmSXCs/a62eb6a33e1d8639dee22a6f7bdca9ac.jpg"
+  },
+     {
+    name:"I'm Done",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/77f2fb9bb3851431d327185d80b837de8b22b22d/I'm Done  Maan Panu  I-Popstar  Vol.1  EP02  Amazon MX Player - Warner Music India.mp3",
+    cover:"https://drive.google.com/thumbnail?id=1fgANA0vPW_vYiZNv06YmN0hZUSGJBUuC&sz=w2000"
+  },
+    {
+    name:"Saudur - Na Sata",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/77f2fb9bb3851431d327185d80b837de8b22b22d/Saudur - Na Sata  Highway Love [Official Visualiser] - Saudur.mp3",
+    cover:"https://i.ibb.co/qMQFRttN/d09e968e1ad8909221318060bc9c6208.jpg"
+  },
+      {
+    name:"Ansh4sure - Bust A Nut",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/0bd34c4206771c6367868a504be5ce58b1f527e6/Ansh4sure - Bust A Nut (Official Video)  ISHQ-E-MAKHAUL - Ansh4sure.mp3",
+    cover:"https://i.ibb.co/twSmSXCs/a62eb6a33e1d8639dee22a6f7bdca9ac.jpg"
+  },
+    {
+    name:"Give Me Some Sunshine",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/0bd34c4206771c6367868a504be5ce58b1f527e6/Give Me Some Sunshine - 3 Idiots  Aamir Khan, Madhavan, Sharman J  Suraj Jagan  Shantanu Moitra - Zee Music Company.mp3",
+    cover:"https://drive.google.com/thumbnail?id=1hngqZ-4TUSG34EnWCUmUK1nY-Cwqh6K7&sz=w2000"
+  },
+      {
+    name:"Behti Hawa Sa Tha Woh",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/0bd34c4206771c6367868a504be5ce58b1f527e6/Behti Hawa Sa Tha Woh – 3 Idiots  Aamir Khan, Madhavan, Sharman J  Shaan & Shantanu M  Swanand K - Zee Music Company.mp3",
+    cover:"https://i.ibb.co/NR8f1Hg/0cf69aab8a3722f0d6805abc7c40701f.jpg"
+  },
+    {
+    name:"Sahiba",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/0bd34c4206771c6367868a504be5ce58b1f527e6/Sahiba Lyrics - Aditya Rikhari • saahiba, aaye ghar kaahe na - Vibe Bird.mp3",
+    cover:"https://i.ibb.co/RT8Wby8C/c40904b2ccafb093bd44cbc78abb2209.jpg"
+  },
+    {
+    name:"TU HAI KAHAN",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/0bd34c4206771c6367868a504be5ce58b1f527e6/AUR - TU HAI KAHAN - Raffey - Usama - Ahad (Official Music Video) (320 kbps).mp3",
+    cover:"https://i.ibb.co/pjYJq2ys/90a397f1764dc5471fd15e13147859eb.jpg"
+  },
+      {
+    name:"Ekti Ekti",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/0bd34c4206771c6367868a504be5ce58b1f527e6/Ekti ekti -Chintu.m4a",
+    cover:"https://i.ibb.co/bjy17LrF/95171b966c7ac0e51a7f0361e0b67d4c.jpg"
+  },
+    {
+    name:"Premalu",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/0bd34c4206771c6367868a504be5ce58b1f527e6/Premalu Song .m4a",
+    cover:"https://i.ibb.co/0jnJ3DVC/a46ecf05788ba510e4f09d4f08d0578b.jpg"
+  },
+     {
+    name:"Sunday",
+    url:"https://raw.githubusercontent.com/89Flexy/Anime-/0bd34c4206771c6367868a504be5ce58b1f527e6/Sunday - Aditya A  Naalayak  Ronit Vinta - Aditya A.mp3",
+    cover:"https://i.ibb.co/9mqzHh07/b6084f026b016b404ee4f186944e5885.jpg"
+  },
+   
+];
+
+
+const audio=document.getElementById("audio");
+const list=document.getElementById("list");
+const nameUI=document.getElementById("songName");
+const cover=document.getElementById("cover");
+const progress=document.getElementById("progress");
+const playBtn=document.getElementById("playBtn");
+
+let index=0;
+
+/* PLAY SONG */
+function playSong(i){
+  index = i;
+  const s = songs[i];
+
+  audio.src = s.url;
+  audio.play();
+
+  nameUI.innerText = s.name;
+  playBtn.innerText = "⬜";
+
+  cover.style.background = `url(${s.cover}) center/cover`;
+  cover.innerHTML = "";
+  cover.classList.add("playing");
+
+  // 🔒 LOCK SCREEN IMAGE
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: s.name,
+      artist: "Music-89",
+      album: "Music-89",
+      artwork: [
+        { src: "https://i.ibb.co/9mqzHh07/b6084f026b016b404ee4f186944e5885.jpg", sizes: "96x96", type: "image/png" },
+        { src: "https://i.ibb.co/9mqzHh07/b6084f026b016b404ee4f186944e5885.jpg", sizes: "128x128", type: "image/png" },
+        { src: "https://i.ibb.co/9mqzHh07/b6084f026b016b404ee4f186944e5885.jpg", sizes: "192x192", type: "image/png" },
+        { src: "https://i.ibb.co/9mqzHh07/b6084f026b016b404ee4f186944e5885.jpg", sizes: "256x256", type: "image/png" },
+        { src: "https://i.ibb.co/9mqzHh07/b6084f026b016b404ee4f186944e5885.jpg", sizes: "384x384", type: "image/png" },
+        { src: "https://i.ibb.co/9mqzHh07/b6084f026b016b404ee4f186944e5885.jpg", sizes: "512x512", type: "image/png" }
+      ]
+    });
+
+    navigator.mediaSession.setActionHandler("play", () => audio.play());
+    navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+    navigator.mediaSession.setActionHandler("nexttrack", next);
+    navigator.mediaSession.setActionHandler("previoustrack", prev);
+  }
+}
+
+function toggle(){
+  if(!audio.src){
+    playSong(0);
+    return;
+  }
+  if(audio.paused){
+    audio.play();
+    playBtn.innerText = "⬜";
+    cover.classList.add("playing");
+  } else {
+    audio.pause();
+    playBtn.innerText = "▶";
+    cover.classList.remove("playing");
+  }
+}
+
+audio.onended = () => {
+  next(); // auto next song
+};
+/* PLAYLIST */
+songs.forEach((s,i)=>{
+  const d=document.createElement("div");
+  d.className="song";
+  d.innerHTML=`<img src="${s.cover}"><span>${s.name}</span>`;
+  d.onclick=()=>playSong(i);
+  list.appendChild(d);
+});
+
+/* PROGRESS */
+audio.ontimeupdate=()=>{
+  progress.max=audio.duration||0;
+  progress.value=audio.currentTime||0;
+};
+progress.oninput=()=>audio.currentTime=progress.value;
+audio.onended=next;
+</script>
+<script>
+function next(){
+  index++;
+  if(index >= songs.length){
+    index = 0; // last ke baad first
+  }
+  playSong(index);
+}
+
+function prev(){
+  index--;
+  if(index < 0){
+    index = songs.length - 1; // first se previous = last
+  }
+  playSong(index);
+}
+</script>
+<script>
+const bgModal = document.getElementById("bgModal");
+const bgGrid  = document.getElementById("bgGrid");
+const player  = document.querySelector(".player");
+
+/* OPEN */
+function openBgModal(){
+  bgModal.style.display = "flex";
+}
+
+/* CLOSE */
+function closeBgModal(){
+  bgModal.style.display = "none";
+}
+
+/* APPLY BACKGROUND */
+bgGrid.querySelectorAll("img").forEach(img=>{
+  img.onclick = ()=>{
+    setBg(img.src);
+    localStorage.setItem("playerBg", img.src);
+    closeBgModal();
+  };
+});
+
+/* SET BG */
+function setBg(src){
+  player.style.background =
+    `linear-gradient(rgba(2,6,23,0.35),rgba(2,6,23,0.50)), url(${src}) center/cover`;
+}
+
+/* LOAD SAVED BG */
+const savedBg = localStorage.getItem("playerBg");
+if(savedBg){
+  setBg(savedBg);
+}
+</script>
+<div class="footer-text">
+  2026 © Abhi-89
+</div>
+<style>
+    .footer-text {
+  position: fixed;        /* scroll ke time bhi bottom me rahe */
+  bottom: 14px;           /* bottom se distance */
+  left: 50%;              /* center horizontal */
+  transform: translateX(-50%); /* perfect center */
+  
+  font-family: 'Poppins', system-ui;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;         /* accent color */
+  
+  text-shadow: 0 0 4px rgba(56,189,248,0.6);  /* subtle glow */
+  
+  z-index: 10000;         /* player ke upar na aaye */
+  pointer-events: none;   /* click ignore ho jaye */
+}
+</style>
+</body>
+</html>
+
+
